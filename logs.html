@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verigate AI | Audit Logs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./public/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { dark: '#0f172a', darker: '#020617', primary: '#10b981', danger: '#ef4444', warning: '#f59e0b', panel: '#1e293b' } } } }
+        }
+    </script>
+</head>
+<body class="app-page logs-page bg-brand-darker text-slate-200 min-h-screen flex flex-col font-sans antialiased">
+
+    <div id="navbar-root"></div>
+
+    <main class="page-shell logs-shell flex-grow">
+        
+        <header class="page-heading logs-heading">
+            <div>
+                <p class="page-kicker">WORKSPACE / RECORDS</p>
+                <h1><i data-lucide="clipboard-list" aria-hidden="true"></i>Audit history</h1>
+                <p>Review and export screening records stored in this browser.</p>
+            </div>
+            
+            <div class="flex gap-3">
+                <button id="clear-logs-btn" class="button-secondary danger-action">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i> Purge Logs
+                </button>
+                <button id="export-json-btn" class="button-primary">
+                    <i data-lucide="download" class="w-4 h-4"></i> Export JSON
+                </button>
+            </div>
+        </header>
+
+        <!-- Filters & Search -->
+        <section class="logs-toolbar glass-panel">
+            <div class="flex items-center gap-2 relative flex-grow max-w-md">
+                <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3"></i>
+                <input type="text" id="search-input" placeholder="Search document ID..." aria-label="Search audit records" class="w-full bg-brand-dark border border-slate-700 text-sm text-slate-200 rounded pl-9 pr-3 py-2 focus:outline-none focus:border-brand-primary">
+            </div>
+            
+            <div class="flex gap-2">
+                <select id="status-filter" aria-label="Filter audit records by status" class="bg-brand-dark border border-slate-700 text-sm text-slate-300 rounded px-3 py-2 focus:outline-none focus:border-brand-primary">
+                    <option value="ALL">All Statuses</option>
+                    <option value="CLEAR">Cleared</option>
+                    <option value="REVIEW">Under Review</option>
+                    <option value="REJECTED">Rejected / Fraud</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Data Table -->
+        <section class="logs-table-panel glass-panel">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left whitespace-nowrap">
+                    <thead class="text-xs text-slate-400 uppercase bg-brand-dark border-b border-slate-800">
+                        <tr>
+                            <th class="px-6 py-4">Timestamp</th>
+                            <th class="px-6 py-4">Document ID</th>
+                            <th class="px-6 py-4">Doc Type</th>
+                            <th class="px-6 py-4">Risk Score</th>
+                            <th class="px-6 py-4">System Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table-body" class="divide-y divide-slate-800/50">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="empty-logs-state" class="hidden flex-col items-center justify-center p-12 text-slate-500" role="status">
+                <i data-lucide="database" class="w-12 h-12 mb-3 opacity-50"></i>
+                <p class="text-sm font-medium">No screening logs found in local storage.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { renderNavbar } from './public/js/components/navbar.js';
+        import { initLogsPage } from './public/js/pages/logs_page.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar('logs');
+            lucide.createIcons();
+            initLogsPage();
+        });
+    </script>
+</body>
+</html>

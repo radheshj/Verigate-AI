@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verigate AI | Module 3: Tamper Check</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./public/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { brand: { dark: '#0f172a', darker: '#020617', primary: '#10b981', danger: '#ef4444', warning: '#f59e0b', panel: '#1e293b' } } } }
+        }
+    </script>
+</head>
+<body class="app-page module-tamper bg-brand-darker text-slate-200 min-h-screen flex flex-col font-sans antialiased">
+
+    <div id="navbar-root"></div>
+
+    <main class="page-shell module-shell flex-grow">
+        
+        <header class="page-heading">
+            <p class="page-kicker">DOCUMENT REVIEW / 03</p>
+            <h1><i data-lucide="microscope" aria-hidden="true"></i>Image forensics</h1>
+            <p>Inspect compression variance with error level analysis on the uploaded image.</p>
+        </header>
+
+        <div class="module-workspace forensic-workspace">
+            
+            <!-- Upload & Original Image Pane -->
+            <section class="workspace-panel glass-panel p-6 rounded-xl border border-slate-800 flex flex-col gap-4 h-full">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="image" class="w-5 h-5 text-slate-400"></i> Original Document
+                </h2>
+                
+                <div id="tamper-dropzone" class="upload-zone relative group border-2 border-dashed border-slate-600 hover:border-brand-primary rounded-lg p-8 flex flex-col items-center justify-center text-center transition-all cursor-pointer bg-brand-darker/50 hover:bg-brand-dark min-h-[350px]">
+                    <input type="file" id="tamper-file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" accept="image/jpeg, image/png, image/webp" aria-label="Choose a document image for forensic analysis">
+                    
+                    <div id="tamper-ui" class="flex flex-col items-center gap-3 z-10 transition-opacity">
+                        <div class="p-4 bg-brand-dark rounded-full group-hover:scale-110 transition-transform">
+                            <i data-lucide="search" class="w-10 h-10 text-brand-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-white">Upload document to scan for tampering</p>
+                            <p class="text-xs text-slate-400 mt-1">Best results with JPEG documents</p>
+                        </div>
+                    </div>
+
+                    <img id="tamper-original-preview" class="absolute inset-0 w-full h-full object-contain opacity-0 z-10 hidden" src="" alt="Original">
+                </div>
+            </section>
+
+            <!-- ELA Heatmap & Results Pane -->
+            <section class="workspace-panel glass-panel p-6 rounded-xl border border-slate-800 flex flex-col gap-4 h-full">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="activity" class="w-5 h-5 text-brand-primary"></i> ELA Forensics Heatmap
+                </h2>
+                
+                <!-- Canvas Container -->
+                <div class="relative bg-black rounded-lg border border-slate-700 w-full h-[350px] flex items-center justify-center overflow-hidden">
+                    <div id="ela-empty" class="text-slate-500 flex flex-col items-center gap-2">
+                        <i data-lucide="layers" class="w-10 h-10 opacity-50"></i>
+                        <span class="text-xs">Heatmap will appear here</span>
+                    </div>
+                    
+                    <canvas id="ela-canvas" class="max-w-full max-h-full object-contain hidden" role="img" aria-label="Error level analysis result"></canvas>
+                    
+                    <div id="ela-loading" class="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
+                        <div class="text-brand-primary font-mono text-sm flex flex-col items-center gap-3">
+                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin"></i>
+                            CALCULATING PIXEL VARIANCES...
+                        </div>
+                    </div>
+                </div>
+                <div id="ela-error" class="module-error hidden" role="alert"></div>
+
+                <!-- Analysis Metrics -->
+                <div id="tamper-metrics" class="grid grid-cols-2 gap-4 hidden">
+                    <div class="bg-brand-darker border border-slate-700 p-3 rounded-lg">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Max Error Variance</p>
+                        <p id="metric-variance" class="text-xl font-black text-white">--</p>
+                    </div>
+                    <div id="metric-verdict-box" class="bg-brand-darker border border-slate-700 p-3 rounded-lg">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Integrity Status</p>
+                        <p id="metric-verdict" class="text-lg font-black text-white">--</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        <nav class="module-pagination" aria-label="Module navigation">
+            <a class="module-next-button" href="module4_facematch.html" aria-label="Next module: Face comparison">
+                <span class="module-next-copy"><small>Next module</small><strong>Face comparison</strong></span>
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+            </a>
+        </nav>
+    </main>
+
+    <script type="module">
+        import { renderNavbar } from './public/js/components/navbar.js';
+        import { initTamperPage } from './public/js/pages/tamper_page.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar('tamper');
+            lucide.createIcons();
+            initTamperPage();
+        });
+    </script>
+</body>
+</html>
